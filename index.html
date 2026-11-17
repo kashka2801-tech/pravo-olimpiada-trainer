@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Право: тренажёр к муниципальному этапу ВсОШ (7–8 класс)</title>
+<style>
+:root{
+  --bg:#f5f6f8;--surface:#ffffff;--surface2:#eef1f5;--text:#1b2230;--muted:#5d6779;--border:#d9dee7;
+  --primary:#1f5fbf;--primary-ink:#ffffff;--ok:#1d7f4e;--ok-bg:#e3f4ea;--bad:#b3261e;--bad-bg:#fbe6e4;--warn:#8a5a00;--warn-bg:#fff2d6;
+  --radius:14px;--shadow:0 2px 10px rgba(20,30,50,.07);
+}
+[data-theme="dark"]{
+  --bg:#12151b;--surface:#1b2029;--surface2:#242b37;--text:#e8ecf2;--muted:#a3adbd;--border:#323b49;
+  --primary:#6aa4ff;--primary-ink:#0d1420;--ok:#58c98d;--ok-bg:#16302a;--bad:#ff8a80;--bad-bg:#3a1d1d;--warn:#f2c14e;--warn-bg:#352b14;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border)}
+.top-row{display:flex;align-items:center;gap:12px;padding:10px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;line-height:1.2}
+.logo svg{flex:none}
+.logo small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+.spacer{flex:1}
+.icon-btn{border:1px solid var(--border);background:var(--surface2);border-radius:10px;padding:7px 11px;min-height:40px}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:thin}
+nav.tabs button{flex:none;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:7px 14px;min-height:40px;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--primary);color:var(--primary-ink);border-color:var(--primary);font-weight:600}
+main{padding:18px 0 30px}
+section.panel{display:none}
+section.panel.active{display:block}
+h2{font-size:22px;margin:0 0 4px}
+.lead{color:var(--muted);margin:0 0 16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:14px;min-height:36px}
+.chip[aria-pressed="true"]{background:var(--surface2);border-color:var(--primary);color:var(--primary);font-weight:600}
+.btn{border:1px solid var(--border);background:var(--surface2);border-radius:10px;padding:9px 14px;min-height:42px;font-weight:600}
+.btn.primary{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+.btn.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+.btn.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.sub-tabs{display:flex;gap:6px;margin:0 0 14px}
+.progress{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:6px 0 14px}
+.progress>i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.stat{color:var(--muted);font-size:14px}
+/* flashcard */
+.flip{perspective:1200px;margin:0 0 12px}
+.flip-inner{position:relative;min-height:290px;transition:transform .5s;transform-style:preserve-3d}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;overflow:auto}
+.face.front{align-items:center;justify-content:center;text-align:center;cursor:pointer}
+.face.back{transform:rotateY(180deg)}
+.term{font-size:clamp(24px,6vw,34px);font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--primary);background:var(--surface2);border-radius:99px;padding:3px 10px;margin-bottom:10px}
+.learned-badge{color:var(--ok);font-weight:600;font-size:14px;margin-top:10px}
+.mnemo{margin-top:12px;background:var(--warn-bg);color:var(--text);border-left:4px solid var(--warn);border-radius:8px;padding:10px 12px}
+.mnemo b{color:var(--warn)}
+/* anagram */
+.letters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:14px 0}
+.letters span{width:38px;height:44px;display:grid;place-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-weight:700;font-size:20px;text-transform:uppercase}
+.ana-input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);font-size:18px;text-align:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 12px;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-bg);color:var(--ok)}
+.feedback.bad{background:var(--bad-bg);color:var(--bad)}
+.feedback.info{background:var(--surface2);color:var(--text)}
+/* compare */
+.cmp{margin-bottom:14px}
+.cmp h3{margin:0 0 10px;font-size:18px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:520px}
+th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface2)}
+td:first-child{font-weight:600;color:var(--muted);width:22%}
+.same{margin-top:10px;background:var(--ok-bg);border-radius:8px;padding:8px 12px}
+/* chains */
+.chain-pool,.chain-answer{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:10px;border:2px dashed var(--border);border-radius:12px;margin-bottom:10px}
+.chain-answer{border-color:var(--primary)}
+.chain-item{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:8px 12px;text-align:left;min-height:42px;max-width:100%}
+.chain-answer .chain-item{background:var(--surface2)}
+.chain-item .num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--primary);color:var(--primary-ink);font-size:13px;font-weight:700;margin-right:6px}
+.chain-item.right{border-color:var(--ok);background:var(--ok-bg)}
+.chain-item.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.label{font-size:13px;color:var(--muted);margin:4px 0}
+.chain-item.dragging{opacity:.5}
+/* accordion */
+details{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;box-shadow:var(--shadow)}
+summary{cursor:pointer;padding:14px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:20px;line-height:1;color:var(--primary)}
+details[open] summary::after{content:"−"}
+details .body{padding:0 16px 14px}
+details ul{margin:0;padding-left:20px}
+details li{margin:4px 0}
+/* quiz */
+.quiz-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px;padding:4px 12px;border-radius:8px;background:var(--surface2)}
+.timer.low{background:var(--bad-bg);color:var(--bad)}
+.q-text{font-size:18px;font-weight:600;margin:0 0 6px}
+.q-note{font-size:13px;color:var(--muted);margin-bottom:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:10px 12px;margin-bottom:8px;min-height:44px}
+.opt .letter{flex:none;width:26px;height:26px;border-radius:6px;border:2px solid var(--border);display:grid;place-items:center;font-weight:700;font-size:14px}
+.opt[aria-pressed="true"]{border-color:var(--primary);background:var(--surface2)}
+.opt[aria-pressed="true"] .letter{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.review-item{border-left:4px solid var(--bad);background:var(--surface);border-radius:8px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--border);border-left-width:4px}
+.review-item.good{border-left-color:var(--ok)}
+.big-score{font-size:34px;font-weight:800}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.home-grid button{text-align:left;height:100%}
+.home-grid h3{margin:0 0 4px;font-size:17px}
+.home-grid p{margin:0;color:var(--muted);font-size:14px}
+.kbd{font-size:13px;color:var(--muted);margin-top:8px}
+@media (max-width:520px){
+  .logo small{display:none}
+  .flip-inner{min-height:340px}
+  .face{padding:16px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="logo">
+        <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="currentColor" opacity=".1"/><path d="M17 6v21M10 27h14M8 11h18M11 11l-4 8a4 4 0 0 0 8 0zM23 11l-4 8a4 4 0 0 0 8 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <div>Право: к олимпиаде<small>Муниципальный этап ВсОШ, 7–8 класс</small></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="themeBtn" aria-label="Сменить тему">Тёмная тема</button>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Разделы">
+      <button role="tab" data-tab="home" aria-selected="true">Главная</button>
+      <button role="tab" data-tab="cards" aria-selected="false">1. Термины</button>
+      <button role="tab" data-tab="compare" aria-selected="false">2. Не перепутай</button>
+      <button role="tab" data-tab="chains" aria-selected="false">3. Цепочки</button>
+      <button role="tab" data-tab="memo" aria-selected="false">4. Памятки</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">5. Блиц-тест</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- HOME -->
+  <section class="panel active" id="home">
+    <h2>Удачи на олимпиаде</h2>
+    <p class="lead">Пройди разделы по порядку: термины, сравнения, цепочки, ловушки и в конце блиц-тест. Весь прогресс сохраняется в этом браузере.</p>
+    <div class="card" style="margin-bottom:14px">
+      <div class="row" style="justify-content:space-between">
+        <div><b id="homeLearned">0</b> из <b id="homeTotal">0</b> терминов выучено</div>
+        <div>Лучший результат теста: <b id="homeBest">—</b></div>
+      </div>
+      <div class="progress"><i id="homeBar"></i></div>
+    </div>
+    <div class="home-grid">
+      <button class="card" data-go="cards"><h3>1. Термины</h3><p>Флеш-карты с ассоциациями и игра «Собери слово».</p></button>
+      <button class="card" data-go="compare"><h3>2. Не перепутай</h3><p>Сходства и различия похожих понятий.</p></button>
+      <button class="card" data-go="chains"><h3>3. Цепочки</h3><p>Расставь шаги и уровни в правильном порядке.</p></button>
+      <button class="card" data-go="memo"><h3>4. Памятки</h3><p>Олимпиадные ловушки и главные правила.</p></button>
+      <button class="card" data-go="quiz"><h3>5. Блиц-тест</h3><p>12 вопросов, таймер, строгая проверка.</p></button>
+    </div>
+    <p class="kbd" style="margin-top:14px">Подсказка: прогресс можно сбросить <button class="btn" id="resetAll" style="min-height:34px;padding:4px 10px;font-size:13px">сбросить всё</button></p>
+  </section>
+
+  <!-- CARDS -->
+  <section class="panel" id="cards">
+    <h2>Термины</h2>
+    <p class="lead">Нажми на карточку, чтобы перевернуть. Отмечай, что уже знаешь.</p>
+    <div class="sub-tabs">
+      <button class="chip" id="modeFlash" aria-pressed="true">Флеш-карты</button>
+      <button class="chip" id="modeAna" aria-pressed="false">Собери слово</button>
+    </div>
+    <div class="chips" id="catChips"></div>
+
+    <div id="flashBox">
+      <div class="row" style="justify-content:space-between">
+        <span class="stat" id="cardPos"></span>
+        <span class="stat">Выучено: <b id="learnedCount">0</b> / <span id="learnedTotal">0</span></span>
+      </div>
+      <div class="progress"><i id="learnBar"></i></div>
+      <div class="flip" id="flip">
+        <div class="flip-inner">
+          <div class="face front" id="front" tabindex="0" role="button" aria-label="Перевернуть карточку">
+            <span class="tag" id="fTag"></span>
+            <div class="term" id="fTerm"></div>
+            <div class="stat" style="margin-top:10px">нажми, чтобы увидеть объяснение</div>
+            <div class="learned-badge" id="fLearned" hidden>✓ выучено</div>
+          </div>
+          <div class="face back" id="back">
+            <span class="tag" id="bTag" style="align-self:flex-start"></span>
+            <div style="font-weight:700;font-size:20px;margin-bottom:6px" id="bTerm"></div>
+            <div id="bDef"></div>
+            <div class="mnemo"><b>Как запомнить:</b> <span id="bMnemo"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <div class="row">
+          <button class="btn" id="prevCard" aria-label="Предыдущая">←</button>
+          <button class="btn" id="flipBtn">Перевернуть</button>
+          <button class="btn" id="nextCard" aria-label="Следующая">→</button>
+        </div>
+        <div class="row">
+          <button class="btn bad" id="againBtn">Повторить</button>
+          <button class="btn ok" id="knowBtn">Знаю</button>
+          <button class="btn" id="shuffleBtn">Перемешать</button>
+        </div>
+      </div>
+      <label class="row stat" style="margin-top:10px"><input type="checkbox" id="onlyNew"> показывать только невыученные</label>
+      <p class="kbd">Клавиши: пробел — перевернуть, ← → — листать.</p>
+    </div>
+
+    <div id="anaBox" hidden>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <span>Счёт: <b id="anaScore">0</b> · Серия: <b id="anaStreak">0</b></span>
+          <span>Рекорд: <b id="anaBest">0</b> · Время: <b id="anaTime">0</b> с</span>
+        </div>
+        <div class="letters" id="anaLetters" aria-label="Перемешанные буквы"></div>
+        <p class="stat" id="anaLen" style="text-align:center;margin:0 0 10px"></p>
+        <form id="anaForm" autocomplete="off">
+          <input class="ana-input" id="anaInput" aria-label="Твой ответ" placeholder="Введи слово">
+          <div class="row" style="margin-top:10px;justify-content:center">
+            <button type="submit" class="btn primary">Проверить</button>
+            <button type="button" class="btn" id="anaHint">Подсказка</button>
+            <button type="button" class="btn" id="anaSkip">Другое слово</button>
+          </div>
+        </form>
+        <div class="feedback" id="anaFb" tabindex="-1"></div>
+        <p class="kbd" style="text-align:center">Чем быстрее и без подсказок, тем больше очков. Первая подсказка — определение, дальше — по одной букве.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section class="panel" id="compare">
+    <h2>Не перепутай</h2>
+    <p class="lead">Сравни похожие понятия по признакам. Зелёная строка — что у них общего.</p>
+    <div class="chips" id="cmpChips"></div>
+    <div id="cmpList"></div>
+  </section>
+
+  <!-- CHAINS -->
+  <section class="panel" id="chains">
+    <h2>Цепочки и последовательности</h2>
+    <p class="lead">Нажимай на элементы по порядку (или перетаскивай). Нажатие на элемент в ответе возвращает его обратно.</p>
+    <div class="chips" id="chainChips"></div>
+    <div class="card">
+      <h3 id="chainTitle" style="margin:0 0 4px;font-size:18px"></h3>
+      <p class="stat" id="chainHint" style="margin:0 0 10px"></p>
+      <div class="label">Твой порядок:</div>
+      <div class="chain-answer" id="chainAnswer" aria-label="Твой порядок"></div>
+      <div class="label">Элементы:</div>
+      <div class="chain-pool" id="chainPool" aria-label="Элементы"></div>
+      <div class="row">
+        <button class="btn primary" id="chainCheck">Проверить</button>
+        <button class="btn" id="chainReset">Заново</button>
+        <button class="btn" id="chainShow">Показать ответ</button>
+      </div>
+      <div class="feedback" id="chainFb" tabindex="-1"></div>
+    </div>
+  </section>
+
+  <!-- MEMO -->
+  <section class="panel" id="memo">
+    <h2>Памятки и олимпиадные ловушки</h2>
+    <p class="lead">Перечитай перед туром — это самые частые места, где теряют баллы.</p>
+    <div id="memoList"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel" id="quiz">
+    <h2>Блиц-тест</h2>
+    <div id="quizStart" class="card">
+      <p style="margin-top:0">12 случайных вопросов, на всё — <b>10 минут</b>. В каждом вопросе может быть <b>один или несколько</b> правильных ответов.</p>
+      <p>Строгая проверка, как на олимпиаде: балл ставится, только если выбраны <b>все</b> правильные буквы и <b>ни одной</b> лишней.</p>
+      <p class="stat">Лучший результат: <b id="quizBest">—</b></p>
+      <button class="btn primary" id="quizGo">Начать тест</button>
+    </div>
+    <div id="quizRun" hidden>
+      <div class="quiz-head">
+        <span class="stat" id="qPos"></span>
+        <span class="timer" id="qTimer" aria-live="off">10:00</span>
+      </div>
+      <div class="progress"><i id="qBar"></i></div>
+      <div class="card">
+        <p class="q-text" id="qText"></p>
+        <p class="q-note" id="qNote">Выбери все правильные варианты.</p>
+        <div id="qOpts"></div>
+        <div class="row" style="justify-content:space-between;margin-top:6px">
+          <button class="btn" id="qPrev">← Назад</button>
+          <button class="btn primary" id="qNext">Дальше →</button>
+        </div>
+      </div>
+    </div>
+    <div id="quizResult" hidden tabindex="-1">
+      <div class="card" style="margin-bottom:14px">
+        <div class="big-score" id="rScore"></div>
+        <p id="rText" style="margin:4px 0 12px"></p>
+        <div class="row">
+          <button class="btn primary" id="quizAgain">Пройти ещё раз</button>
+          <button class="btn" id="quizOnlyErr">Показать только ошибки</button>
+        </div>
+      </div>
+      <div id="rList"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ===================== ДАННЫЕ ===================== */
+const CATS = [
+  {id:"theory", name:"Теория права"},
+  {id:"const", name:"Конституционное"},
+  {id:"intl", name:"Международное"},
+  {id:"civil", name:"Гражданское, семейное, трудовое"},
+  {id:"crim", name:"Уголовное и процесс"}
+];
+const TERMS = [
+ // Теория права
+ {t:"Инкорпорация",c:"theory",d:"Способ систематизации: нормативные акты объединяют в сборник (по алфавиту, хронологии, теме) БЕЗ изменения их содержания. Пример: Собрание законодательства РФ.",m:"«Корпус» — это корпус-папка: сложили документы в одну папку, но ни слова в них не поменяли."},
+ {t:"Кодификация",c:"theory",d:"Способ систематизации: нормы ПЕРЕРАБАТЫВАЮТ и создают новый единый акт — кодекс (ГК РФ, УК РФ). Устаревшее убирают, противоречия устраняют.",m:"Кодификация → КОДЕКС. Кодекс пишут заново, как новый «код» программы."},
+ {t:"Консолидация",c:"theory",d:"Объединение нескольких актов по одному вопросу в один новый акт без изменения сути норм. Его принимает правотворческий орган (в отличие от сборника при инкорпорации).",m:"«Солидный» — из многих маленьких актов сделали один солидный, но смысл тот же."},
+ {t:"Юрисдикция",c:"theory",d:"Полномочие органа решать правовые дела и споры; также круг дел или территория, на которые распространяется власть органа или государства.",m:"«Юрис» — право, «дикцио» — говорю: кто имеет право «сказать решение» по делу."},
+ {t:"Гипотеза",c:"theory",d:"Часть нормы права, которая указывает условия, при которых норма действует. Отвечает на вопрос «ЕСЛИ…».",m:"Гипотеза = ЕСЛИ. «Если тебе исполнилось 18 лет…»"},
+ {t:"Диспозиция",c:"theory",d:"Часть нормы права, которая содержит само правило поведения: права и обязанности. Отвечает на вопрос «ТО…».",m:"Диспозиция = ТО (что делать). «Позиция» — как нужно себя вести."},
+ {t:"Санкция",c:"theory",d:"Часть нормы права, которая указывает последствия нарушения правила (наказание). Отвечает на вопрос «ИНАЧЕ…».",m:"Санкция = ИНАЧЕ. Порядок частей нормы: Г-Д-С — «Где Деньги, Сеня?»"},
+ {t:"Пролонгация",c:"theory",d:"Продление срока действия договора, соглашения или нормативного акта.",m:"«Лонг» (long) — длинный: срок сделали длиннее."},
+ {t:"Прецедент",c:"theory",d:"Решение суда по конкретному делу, которое становится образцом (обязательным правилом) для похожих дел. Главный источник права в англосаксонской системе (Великобритания, США).",m:"«Пре-» — прежде: так уже решили прежде, значит, решаем так же."},
+ {t:"Правоспособность",c:"theory",d:"Способность ИМЕТЬ права и обязанности. У гражданина возникает с рождения и прекращается со смертью.",m:"Права «способен иметь» каждый с рождения: даже у младенца есть право на имя и наследство."},
+ {t:"Дееспособность",c:"theory",d:"Способность СВОИМИ ДЕЙСТВИЯМИ приобретать и осуществлять права и создавать обязанности. В полном объёме — с 18 лет (или раньше при браке или эмансипации).",m:"«Дее» = действие: сам действую — значит, дееспособен."},
+ {t:"Деликтоспособность",c:"theory",d:"Способность самостоятельно отвечать за правонарушение (деликт), например возмещать причинённый вред. Несовершеннолетние с 14 лет сами отвечают за причинённый вред.",m:"Деликт — проступок. Способен ОТВЕЧАТЬ за деликт — деликтоспособен."},
+ // Конституционное
+ {t:"Суверенитет",c:"const",d:"Верховенство государственной власти внутри страны и её независимость во внешних делах. Носитель суверенитета в РФ — многонациональный народ.",m:"«Сувере́н» — верховный правитель: государство само себе хозяин."},
+ {t:"Плюрализм",c:"const",d:"Многообразие мнений, идеологий, партий. В РФ признаётся идеологическое и политическое многообразие; никакая идеология не может быть государственной или обязательной (ст. 13 Конституции).",m:"«Плюрал» — множественное число: мнений много, а не одно."},
+ {t:"Импичмент",c:"const",d:"Особая процедура отрешения главы государства от должности. В РФ обвинение против Президента выдвигает Госдума, а решение об отрешении принимает Совет Федерации.",m:"Звучит как «и-ми-пинок»: «выпнуть» президента с поста по особой процедуре."},
+ {t:"Вето",c:"const",d:"Право отклонить (запретить) закон. В РФ Президент может отклонить закон; вето преодолевается, если закон снова одобрят 2/3 голосов Госдумы и Совета Федерации.",m:"Латинское «veto» = «запрещаю»."},
+ {t:"Референдум",c:"const",d:"Всенародное голосование граждан по важным вопросам государства. Высшее непосредственное выражение власти народа наряду с выборами.",m:"«Референт» — докладчик: вопрос «докладывают» народу, и он решает сам."},
+ {t:"Омбудсмен",c:"const",d:"Уполномоченный по правам человека — должностное лицо, которое защищает права граждан от нарушений со стороны органов власти. В РФ назначается Госдумой.",m:"Слово шведское: омбудсмен — «представитель» людей перед властью."},
+ {t:"Федерализм",c:"const",d:"Форма территориального устройства, при которой государство состоит из субъектов (республик, краёв, областей) с собственными органами власти и законами. РФ — федерация.",m:"Федерация — как «семья» регионов: у каждого своя комната, но дом общий."},
+ {t:"Светское государство",c:"const",d:"Государство, где никакая религия не может быть государственной или обязательной, а религиозные объединения отделены от государства и равны перед законом (ст. 14 Конституции РФ).",m:"«Свет» = мир, мирская жизнь: государство живёт по светским, а не церковным законам."},
+ // Международное
+ {t:"Ратификация",c:"intl",d:"Окончательное утверждение международного договора высшим органом государства, после чего договор становится обязательным. В РФ — федеральным законом.",m:"«Ратификация» → «рад»: страна рада договору и утверждает его."},
+ {t:"Денонсация",c:"intl",d:"Официальный отказ государства от ранее заключённого международного договора в порядке, предусмотренном договором.",m:"«Де-» — отмена: «де-нонсировать» = отменить своё «да»."},
+ {t:"Экстрадиция",c:"intl",d:"Выдача государством лица, совершившего преступление, другому государству для суда или исполнения наказания. Гражданин РФ не может быть выдан другому государству (ст. 61 Конституции).",m:"«Экс-» — вовне, «традиция» — передача: передать человека наружу, другой стране."},
+ {t:"Апатрид",c:"intl",d:"Лицо без гражданства: не является гражданином ни одного государства.",m:"«А-» — нет (как «аморальный»), «патрия» — родина: без родины-гражданства."},
+ {t:"Бипатрид",c:"intl",d:"Лицо, имеющее гражданство двух (или более) государств одновременно — двойное гражданство.",m:"«Би-» — два (как «бинокль», «велосипед-бицикл»): две родины-гражданства."},
+ {t:"Дипломатический иммунитет",c:"intl",d:"Неприкосновенность дипломатов: их нельзя арестовать, задержать, судить по законам страны пребывания (Венская конвенция о дипломатических сношениях 1961 г.).",m:"Иммунитет защищает организм от болезней, а дипломатический — дипломата от ареста."},
+ {t:"Конвенция",c:"intl",d:"Международный договор по определённому вопросу, часто многосторонний. Пример: Конвенция ООН о правах ребёнка (1989).",m:"«Конвент» — собрание: многие страны собрались и договорились."},
+ {t:"Персона нон грата",c:"intl",d:"Иностранный дипломат, которого государство объявляет нежелательным. Такой дипломат должен покинуть страну. Объяснять причины государство не обязано.",m:"Латынь: «persona non grata» — «лицо нежеланное», «грата» как «грация, приятность» — неприятный гость."},
+ {t:"Агреман",c:"intl",d:"Согласие государства принять конкретного человека в качестве главы дипломатического представительства (посла) другой страны.",m:"Французское «agrément» — одобрение, согласие (как английское «agree»)."},
+ {t:"Беженец",c:"intl",d:"Человек, который вынужден покинуть страну своего гражданства из-за обоснованного страха преследования (по расе, религии, национальности, политическим взглядам) и не может вернуться. Статус определяет Конвенция о статусе беженцев 1951 г.",m:"Бежит не за лучшей жизнью, а от опасности преследования."},
+ {t:"Гуманитарное право",c:"intl",d:"Международное гуманитарное право — нормы, которые во время вооружённых конфликтов защищают раненых, пленных, мирных жителей и ограничивают средства и методы войны. Основа — Женевские конвенции 1949 г.",m:"«Гуманный» = человечный: правила человечности даже на войне. Символ — Красный Крест."},
+ // Гражданское, семейное, трудовое
+ {t:"Эмансипация",c:"civil",d:"Объявление несовершеннолетнего, достигшего 16 лет, полностью дееспособным, если он работает по трудовому договору или занимается предпринимательством с согласия родителей. Решение принимает орган опеки (при согласии обоих родителей) или суд.",m:"«Эман» — освобождение: в 16 лет «освобождают» от опеки родителей во взрослых делах."},
+ {t:"Исковая давность",c:"civil",d:"Срок, в течение которого можно защитить нарушенное право через суд. Общий срок — 3 года.",m:"«Давность» — давно было: если прошло больше 3 лет, суд может отказать."},
+ {t:"Реституция",c:"civil",d:"Возвращение сторон в первоначальное положение: при недействительной сделке каждая сторона возвращает другой всё полученное.",m:"«Ре-» — снова, обратно: «реставрация» вернула вещи прежний вид, «реституция» вернула всё сторонам."},
+ {t:"Опека",c:"civil",d:"Форма устройства детей до 14 лет, оставшихся без попечения родителей (а также недееспособных граждан). Опекун сам совершает сделки от имени подопечного.",m:"ОПЕКА — для малышей до 14: опекун делает всё за ребёнка."},
+ {t:"Попечительство",c:"civil",d:"Форма устройства несовершеннолетних от 14 до 18 лет (и граждан, ограниченных в дееспособности). Подопечный сам совершает сделки, а попечитель даёт согласие.",m:"Попечитель «печётся» и разрешает, но подросток действует сам."},
+ {t:"Алименты",c:"civil",d:"Средства на содержание, которые по закону обязаны платить одни члены семьи другим (например, родители — детям). На одного ребёнка — 1/4 заработка, на двух — 1/3, на трёх и более — 1/2.",m:"Латинское «alimentum» — пища, питание: деньги «на прокорм»."},
+ {t:"Совместительство",c:"civil",d:"Выполнение работником другой регулярной оплачиваемой работы в свободное от основной работы время. Лицам до 18 лет работа по совместительству не допускается.",m:"СОВМЕЩАЕТ две работы. Подросткам нельзя — сначала учёба и отдых."},
+ // Уголовное и процесс
+ {t:"Презумпция невиновности",c:"crim",d:"Человек считается невиновным, пока его вина не доказана в законном порядке и не установлена вступившим в силу приговором суда. Обвиняемый не обязан доказывать свою невиновность (ст. 49 Конституции).",m:"«Презумпция» — предположение: заранее предполагаем, что человек честный."},
+ {t:"Рецидив",c:"crim",d:"Совершение умышленного преступления лицом, у которого уже есть судимость за ранее совершённое умышленное преступление. Судимости за преступления до 18 лет не учитываются.",m:"В медицине рецидив — болезнь вернулась; в праве — преступник «вернулся» к преступлениям."},
+ {t:"Соучастие",c:"crim",d:"Умышленное совместное участие двух или более лиц в совершении умышленного преступления. Виды соучастников: исполнитель, организатор, подстрекатель, пособник.",m:"Соучастники — «ИОПП»: Исполнитель, Организатор, Подстрекатель, Пособник."},
+ {t:"Необходимая оборона",c:"crim",d:"Защита себя или других от общественно опасного посягательства путём причинения вреда САМОМУ НАПАДАЮЩЕМУ. Не преступление, если не превышены её пределы.",m:"Оборона — от НАПАДАЮЩЕГО и вред ему же."},
+ {t:"Крайняя необходимость",c:"crim",d:"Причинение вреда для устранения опасности, которую нельзя устранить иначе. Вред причиняют ТРЕТЬИМ лицам, и он должен быть МЕНЬШЕ предотвращённого.",m:"Разбил чужое окно, чтобы вытащить ребёнка из пожара: вред меньше спасённого."},
+ {t:"Апелляция",c:"crim",d:"Обжалование и пересмотр решения суда, которое ЕЩЁ НЕ вступило в законную силу.",m:"Апелляция — Активна, пока решение не вступило: «Апельсин ещё не созрел»."},
+ {t:"Кассация",c:"crim",d:"Обжалование и пересмотр решения суда, которое УЖЕ вступило в законную силу.",m:"Кассация — решение уже в «кассе» (уже вступило, «оплачено»)."},
+ {t:"Ходатайство",c:"crim",d:"Официальная просьба участника процесса к суду, следователю или другому органу (например, вызвать свидетеля, приобщить документ).",m:"«Ходатай» — тот, кто «ходит» и просит за дело."},
+ {t:"Амнистия",c:"crim",d:"Освобождение от наказания или смягчение наказания неопределённого круга лиц (категории людей). В РФ объявляет Государственная Дума.",m:"АмнистиЯ — ДумА; категория людей («всех ветеранов», «всех несовершеннолетних»)."},
+ {t:"Помилование",c:"crim",d:"Освобождение от наказания или смягчение наказания конкретного, индивидуально определённого человека. В РФ осуществляет Президент.",m:"Помилование — Президент: оба на «П», и человек один, «персональный»."},
+ {t:"Арбитр",c:"crim",d:"Лицо, которое разрешает спор между сторонами (третейский судья, посредник). Также арбитражные суды в РФ рассматривают экономические споры.",m:"Как арбитр в футболе: независимый судья, который решает спор."}
+];
+
+const CMP = [
+ {cat:"crim",title:"Административная vs Уголовная ответственность",a:"Административная",b:"Уголовная",rows:[
+   ["За что","Административное правонарушение (проступок)","Преступление"],
+   ["Возраст","С 16 лет","С 16 лет; за ряд тяжёлых преступлений (убийство, кража, грабёж и др.) — с 14 лет"],
+   ["Кодекс","КоАП РФ","УК РФ (только он!)"],
+   ["Кто назначает","Суд, полиция, инспекции и другие органы","Только суд (приговор)"],
+   ["Наказания","Предупреждение, штраф, обязательные работы, административный арест и др.","Штраф, обязательные и исправительные работы, лишение свободы и др."],
+   ["Судимость","Не возникает","Возникает"]],same:"Оба вида — юридическая ответственность за правонарушение, назначаются государством, действуют с 16 лет по общему правилу."},
+ {cat:"crim",title:"Проступок vs Преступление",a:"Проступок",b:"Преступление",rows:[
+   ["Опасность","Меньшая общественная вредность","Общественная опасность — наиболее опасное правонарушение"],
+   ["Где описано","КоАП, ТК, ГК и другие законы","Только в Уголовном кодексе"],
+   ["Виды","Административные, дисциплинарные, гражданские","Небольшой, средней тяжести, тяжкие, особо тяжкие"],
+   ["Пример","Переход дороги на красный свет","Кража, грабёж"]],same:"И то и другое — правонарушение: виновное противоправное деяние деликтоспособного лица."},
+ {cat:"civil",title:"Опека vs Попечительство",a:"Опека",b:"Попечительство",rows:[
+   ["Возраст","Дети до 14 лет","Подростки от 14 до 18 лет"],
+   ["Взрослые","Недееспособные граждане","Ограниченно дееспособные граждане"],
+   ["Сделки","Опекун совершает сделки сам, от имени подопечного","Подопечный совершает сделки сам, попечитель даёт согласие"]],same:"Обе формы устанавливает орган опеки и попечительства, цель — защита прав тех, кто не может полностью сам о себе позаботиться."},
+ {cat:"crim",title:"Необходимая оборона vs Крайняя необходимость",a:"Необходимая оборона",b:"Крайняя необходимость",rows:[
+   ["Источник опасности","Только общественно опасное посягательство человека","Любой: пожар, наводнение, животное, техника, человек"],
+   ["Кому причиняется вред","Самому нападающему","Третьим лицам (посторонним)"],
+   ["Размер вреда","Не должен явно не соответствовать посягательству (нельзя превышать пределы)","Должен быть МЕНЬШЕ предотвращённого"],
+   ["Можно ли иначе","Можно обороняться, даже если есть возможность убежать","Только если опасность нельзя устранить иначе"]],same:"Обстоятельства, исключающие преступность деяния: причинённый вред не преступление, если соблюдены условия."},
+ {cat:"intl",title:"Апатрид vs Бипатрид",a:"Апатрид",b:"Бипатрид",rows:[
+   ["Суть","Лицо без гражданства","Лицо с гражданством двух и более государств"],
+   ["Приставка","«а-» — отсутствие","«би-» — два"],
+   ["Проблема","Не защищено ни одним государством","Обязанности перед двумя государствами"]],same:"Оба — особые правовые статусы в вопросах гражданства, регулируются международным и национальным правом."},
+ {cat:"intl",title:"Ратификация vs Денонсация",a:"Ратификация",b:"Денонсация",rows:[
+   ["Суть","Утверждение международного договора","Отказ от международного договора"],
+   ["Последствие","Договор становится обязательным для государства","Договор прекращает действовать для государства"],
+   ["Как в РФ","Федеральным законом","Федеральным законом (для ратифицированных договоров)"]],same:"Обе — официальные действия государства с международным договором."},
+ {cat:"const",title:"Республики vs Другие субъекты РФ",a:"Республика",b:"Край, область, город федерального значения, АО",rows:[
+   ["Основной закон","Конституция","Устав"],
+   ["Государственный язык","Вправе установить свои государственные языки наряду с русским","Не вправе"],
+   ["Равноправие","Равноправна с другими субъектами в отношениях с федерацией","Равноправны с республиками"]],same:"Все — равноправные субъекты Российской Федерации, у всех есть свои органы власти и законодательство."},
+ {cat:"crim",title:"Амнистия vs Помилование",a:"Амнистия",b:"Помилование",rows:[
+   ["Кто","Государственная Дума","Президент РФ"],
+   ["Для кого","Неопределённый круг лиц (категория)","Конкретный человек"],
+   ["Акт","Постановление Госдумы","Указ Президента"]],same:"Обе освобождают от наказания или смягчают его, снимают судимость или сокращают срок."},
+ {cat:"crim",title:"Апелляция vs Кассация",a:"Апелляция",b:"Кассация",rows:[
+   ["Решение","Ещё НЕ вступило в законную силу","УЖЕ вступило в законную силу"],
+   ["Очерёдность","Сначала","Потом"],
+   ["Как запомнить","А — раньше по алфавиту, значит, раньше по времени","К — позже по алфавиту"]],same:"Обе — способы обжаловать судебное решение в вышестоящем суде."}
+];
+
+const CHAINS = [
+ {title:"Система права: от меньшего к большему",hint:"Начни с самого маленького элемента.",items:["Норма права","Институт права","Подотрасль права","Отрасль права","Система права"],note:"Статья закона — это НЕ элемент системы права, а элемент системы законодательства."},
+ {title:"Структура нормы права",hint:"Если → То → Иначе.",items:["Гипотеза (если…)","Диспозиция (то…)","Санкция (иначе…)"],note:"Г-Д-С: «Где Деньги, Сеня?»"},
+ {title:"Возрастные пороги",hint:"От младшего возраста к старшему.",items:["6 лет — мелкие бытовые сделки","14 лет — паспорт, частичная дееспособность, уголовная ответственность за отдельные преступления","16 лет — полная уголовная и административная ответственность, трудовой договор, эмансипация","18 лет — полная дееспособность, выборы"],note:"Ещё полезно: с 10 лет нужно согласие ребёнка на смену имени и усыновление."},
+ {title:"Как принимается федеральный закон",hint:"От идеи до вступления в силу.",items:["Законодательная инициатива","Госдума принимает закон (3 чтения)","Совет Федерации одобряет","Президент подписывает","Официальное опубликование"],note:"Президент подписывает в течение 14 дней, публикация — в течение 7 дней после подписания."},
+ {title:"Импичмент Президента РФ",hint:"Кто начинает и кто заканчивает.",items:["Госдума выдвигает обвинение","Заключение Верховного Суда о признаках преступления","Заключение Конституционного Суда о соблюдении порядка","Совет Федерации принимает решение об отрешении"],note:"Обвинение — Госдума, решение — Совет Федерации."},
+ {title:"Путь обжалования судебного решения",hint:"От первого решения к пересмотру.",items:["Суд первой инстанции выносит решение","Апелляция (решение не вступило в силу)","Решение вступает в законную силу","Кассация (решение уже вступило в силу)"],note:"Апелляция раньше кассации: «А» перед «К»."},
+ {title:"Международный договор",hint:"От переговоров до отказа.",items:["Переговоры","Подписание","Ратификация","Действие договора","Денонсация"],note:"Ратификация — согласие быть обязанным, денонсация — выход."}
+];
+
+const MEMO = [
+ {title:"Ловушки в тестах",items:[
+   "Подчёркивай частицу «НЕ», слова «кроме», «только», «всегда»: они переворачивают смысл вопроса.",
+   "В заданиях с несколькими ответами одна лишняя или пропущенная буква обычно даёт 0 баллов за всё задание.",
+   "Не выбирай ответ, который «почти правильный»: на олимпиаде правильный ответ формально точен (кто, когда, какой орган).",
+   "Если не уверена — сначала исключи точно неверные варианты.",
+   "Проверь, о чём спрашивают: о норме права или о статье закона, о Президенте или о Правительстве."]},
+ {title:"Вставка пропущенных слов",items:[
+   "Пиши слово в той грамматической форме, которую требует текст: падеж, число, род.",
+   "Пример: «…лишение родительских прав производится в ___ порядке» — ответ «судебном», а не «суд».",
+   "Не меняй порядок слов и не добавляй лишнего: проверяют точное совпадение.",
+   "Перечитай предложение целиком с вставленным словом — оно должно звучать грамотно."]},
+ {title:"Кто принимает решение",items:[
+   "Лишение и ограничение родительских прав — только суд.",
+   "Присяжные заседатели — только в уголовных делах.",
+   "Конституционный Суд РФ находится в Санкт-Петербурге.",
+   "Амнистия — Госдума; помилование — Президент.",
+   "Импичмент: обвинение — Госдума, решение — Совет Федерации.",
+   "Уголовное наказание назначает только суд.",
+   "Эмансипация — орган опеки и попечительства (при согласии обоих родителей) или суд.",
+   "Уполномоченного по правам человека назначает Госдума."]},
+ {title:"Что нельзя ограничить даже при чрезвычайном положении",items:[
+   "Право на жизнь.",
+   "Достоинство личности (никто не может подвергаться пыткам).",
+   "Неприкосновенность частной жизни, личная и семейная тайна, защита чести.",
+   "Свобода совести и вероисповедания.",
+   "Неприкосновенность жилища, право на судебную защиту, презумпция невиновности.",
+   "Это перечислено в ст. 56 Конституции РФ."]},
+ {title:"Числа и возрасты, которые часто спрашивают",items:[
+   "6 лет — мелкие бытовые сделки; до 6 лет сделки за ребёнка совершают родители.",
+   "10 лет — учёт мнения ребёнка обязателен, нужно его согласие на смену имени и усыновление.",
+   "14 лет — паспорт, распоряжение своим заработком и стипендией, ответственность за вред, уголовная ответственность за отдельные преступления.",
+   "16 лет — административная и общая уголовная ответственность, эмансипация, трудовой договор, брак при уважительных причинах (по решению органа местного самоуправления).",
+   "18 лет — полная дееспособность, право голосовать, брачный возраст.",
+   "Отпуск работников до 18 лет — 31 календарный день.",
+   "Общий срок исковой давности — 3 года.",
+   "Алименты: 1/4 на одного ребёнка, 1/3 на двух, 1/2 на трёх и более."]},
+ {title:"Как решать правовую задачу (казус)",items:[
+   "Найди возраст каждого участника — от него зависит ответственность и дееспособность.",
+   "Определи отрасль права: гражданское, семейное, трудовое, административное, уголовное.",
+   "Найди, какой орган принимает решение по такому делу.",
+   "Пиши ответ по схеме: ответ → правило (норма) → применение к ситуации → вывод.",
+   "Если можно — укажи статью или название закона, но главное — логика рассуждения."]}
+];
+
+const QUESTIONS = [
+ {q:"Какие способы систематизации НЕ изменяют содержание норм?",o:["Инкорпорация","Кодификация","Консолидация","Ратификация"],a:[0,2],e:"Инкорпорация и консолидация объединяют акты без изменения содержания. Кодификация перерабатывает нормы в новый кодекс, а ратификация — вообще не систематизация, а утверждение договора."},
+ {q:"Какая часть нормы права указывает на последствия её нарушения?",o:["Гипотеза","Диспозиция","Санкция","Преамбула"],a:[2],e:"Санкция — «иначе»: последствия нарушения. Гипотеза — условия, диспозиция — само правило."},
+ {q:"Кто в РФ объявляет амнистию?",o:["Президент РФ","Государственная Дума","Совет Федерации","Верховный Суд"],a:[1],e:"Амнистию объявляет Госдума для категории лиц. Президент осуществляет помилование конкретного человека."},
+ {q:"Выберите элементы системы права.",o:["Норма права","Статья закона","Институт права","Отрасль права"],a:[0,2,3],e:"Система права: норма → институт → подотрасль → отрасль. Статья закона относится к системе законодательства — частая ловушка."},
+ {q:"Кто такой апатрид?",o:["Лицо с двойным гражданством","Лицо без гражданства","Беженец","Иностранный дипломат"],a:[1],e:"Апатрид — без гражданства («а-» = нет). Лицо с двумя гражданствами — бипатрид."},
+ {q:"Что такое агреман?",o:["Отказ от международного договора","Согласие государства принять конкретное лицо в качестве посла другой страны","Объявление дипломата нежелательным","Выдача преступника"],a:[1],e:"Агреман — согласие на назначение посла. Отказ от договора — денонсация, нежелательный дипломат — персона нон грата, выдача — экстрадиция."},
+ {q:"Какие права НЕ могут быть ограничены даже при чрезвычайном положении?",o:["Право на жизнь","Свобода передвижения","Достоинство личности","Неприкосновенность частной жизни"],a:[0,2,3],e:"Ст. 56 Конституции: жизнь, достоинство, частная жизнь и личная тайна не ограничиваются. Свободу передвижения при ЧП ограничить можно."},
+ {q:"С какого возраста наступает административная ответственность?",o:["14 лет","16 лет","18 лет","12 лет"],a:[1],e:"По КоАП административная ответственность наступает с 16 лет."},
+ {q:"Что отличает крайнюю необходимость от необходимой обороны?",o:["Вред причиняется третьим лицам","Вред должен быть меньше предотвращённого","Вред причиняется только нападающему","Опасность может исходить от стихии"],a:[0,1,3],e:"При крайней необходимости вред причиняют посторонним, он должен быть меньше предотвращённого, а опасность может быть любой, в том числе стихийной. Вред нападающему — это необходимая оборона."},
+ {q:"Пересмотр решения суда, которое ещё НЕ вступило в законную силу, — это…",o:["Кассация","Апелляция","Надзор","Ходатайство"],a:[1],e:"Апелляция — до вступления решения в силу, кассация и надзор — после. Ходатайство — просьба участника процесса."},
+ {q:"Какие субъекты РФ вправе устанавливать свои государственные языки?",o:["Края","Республики","Области","Автономные округа"],a:[1],e:"По ст. 68 Конституции только республики вправе устанавливать свои государственные языки."},
+ {q:"Где находится Конституционный Суд РФ?",o:["Москва","Санкт-Петербург","Казань","Екатеринбург"],a:[1],e:"Конституционный Суд РФ находится в Санкт-Петербурге."},
+ {q:"Кто вправе лишить родителей родительских прав?",o:["Орган опеки и попечительства","Суд","Полиция","Школа"],a:[1],e:"Лишение родительских прав — только в судебном порядке. Орган опеки может подать иск, но решает суд."},
+ {q:"Что верно для попечительства?",o:["Устанавливается над детьми до 14 лет","Устанавливается над подростками от 14 до 18 лет","Подопечный совершает сделки сам с согласия попечителя","Попечитель всегда сам совершает сделки за подопечного"],a:[1,2],e:"Попечительство — 14–18 лет, подросток действует сам с согласия попечителя. До 14 лет — опека, и тогда сделки за ребёнка совершает опекун."},
+ {q:"Какие документы относятся к международному гуманитарному праву?",o:["Женевские конвенции 1949 г.","Гражданский кодекс РФ","Дополнительные протоколы к Женевским конвенциям","Устав школы"],a:[0,2],e:"Основа гуманитарного права — Женевские конвенции 1949 г. и Дополнительные протоколы к ним. ГК РФ и устав школы — внутренние акты."},
+ {q:"Что такое экстрадиция?",o:["Выдача лица другому государству для суда или наказания","Высылка дипломата","Предоставление убежища","Лишение гражданства"],a:[0],e:"Экстрадиция — выдача преступника. Важно: гражданина РФ другому государству выдать нельзя (ст. 61 Конституции)."},
+ {q:"Какие элементы характерны для эмансипации?",o:["Возраст 16 лет","Работа по трудовому договору или предпринимательство","Решение органа опеки или суда","Возраст 14 лет"],a:[0,1,2],e:"Эмансипировать можно с 16 лет при работе по трудовому договору или предпринимательстве; решает орган опеки (при согласии обоих родителей) или суд."},
+ {q:"Какие виды соучастников выделяет УК РФ?",o:["Исполнитель","Организатор","Свидетель","Пособник"],a:[0,1,3],e:"Соучастники: исполнитель, организатор, подстрекатель, пособник. Свидетель — участник процесса, а не соучастник."},
+ {q:"Что означает презумпция невиновности?",o:["Обвиняемый обязан доказать свою невиновность","Лицо невиновно, пока вина не доказана и не установлена приговором суда","Неустранимые сомнения толкуются в пользу обвиняемого","Виновность устанавливает полиция"],a:[1,2],e:"Ст. 49 Конституции: вина доказывается законным путём и устанавливается приговором суда, сомнения — в пользу обвиняемого. Доказывать невиновность обвиняемый не обязан."},
+ {q:"Кому разрешена работа по совместительству?",o:["Работнику 15 лет","Работнику 17 лет","Совершеннолетнему работнику","Работнику 16 лет"],a:[2],e:"Лицам до 18 лет совместительство не допускается (ст. 282 ТК РФ)."},
+ {q:"Какой общий срок исковой давности в гражданском праве РФ?",o:["1 год","3 года","5 лет","10 лет"],a:[1],e:"Общий срок исковой давности — 3 года (ст. 196 ГК РФ)."},
+ {q:"Какие принципы закреплены в Конституции РФ?",o:["Идеологическое многообразие","Обязательная государственная идеология","Светский характер государства","Государственная религия"],a:[0,2],e:"Ст. 13 — идеологический плюрализм, никакая идеология не обязательна. Ст. 14 — РФ светское государство, никакая религия не может быть государственной."}
+];
+
+/* ===================== ХРАНИЛИЩЕ ===================== */
+const KEY = "pravoTrainer_v1";
+const store = (()=>{let s={};try{s=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}return s})();
+store.learned = store.learned || {};
+store.quizBest = store.quizBest ?? null;
+store.anaBest = store.anaBest || 0;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+
+const $ = s => document.querySelector(s);
+const el = (tag, attrs={}, html) => {const n=document.createElement(tag);for(const k in attrs){if(k==="class")n.className=attrs[k];else n.setAttribute(k,attrs[k])}if(html!==undefined)n.innerHTML=html;return n};
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const catName = id => (CATS.find(c=>c.id===id)||{}).name||"";
+function reveal(node){node.scrollIntoView({behavior:"smooth",block:"center"});node.focus({preventScroll:true})}
+
+/* ===================== ТЕМА ===================== */
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t);$("#themeBtn").textContent=t==="dark"?"Светлая тема":"Тёмная тема";store.theme=t;save()}
+applyTheme(store.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+$("#themeBtn").onclick=()=>applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");
+
+/* ===================== ВКЛАДКИ ===================== */
+function openTab(id){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===id));
+  document.querySelectorAll("section.panel").forEach(p=>p.classList.toggle("active",p.id===id));
+  if(id==="home")updateHome();
+  window.scrollTo({top:0});
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>openTab(b.dataset.go));
+function updateHome(){
+  const n=Object.keys(store.learned).filter(k=>store.learned[k]&&TERMS.some(t=>t.t===k)).length;
+  $("#homeLearned").textContent=n;$("#homeTotal").textContent=TERMS.length;
+  $("#homeBar").style.width=(n/TERMS.length*100)+"%";
+  $("#homeBest").textContent=store.quizBest===null?"—":store.quizBest+" из 12";
+}
+$("#resetAll").onclick=()=>{if(confirm("Сбросить весь прогресс?")){store.learned={};store.quizBest=null;store.anaBest=0;save();updateHome();renderCard();$("#quizBest").textContent="—";$("#anaBest").textContent="0"}};
+
+/* ===================== 1. КАРТОЧКИ ===================== */
+let curCat="all", deck=[], idx=0, mode="flash";
+function buildCatChips(){
+  const box=$("#catChips");box.innerHTML="";
+  [{id:"all",name:"Все"}].concat(CATS).forEach(c=>{
+    const b=el("button",{class:"chip","aria-pressed":c.id===curCat},esc(c.name));
+    b.onclick=()=>{curCat=c.id;buildCatChips();buildDeck();if(mode==="ana")newAnagram()};
+    box.appendChild(b);
+  });
+}
+function filtered(){return TERMS.filter(t=>curCat==="all"||t.c===curCat)}
+function buildDeck(shuf){
+  let d=filtered();
+  if($("#onlyNew").checked){const nw=d.filter(t=>!store.learned[t.t]);if(nw.length)d=nw}
+  deck=shuf?shuffle(d):d;idx=0;renderCard();
+}
+function renderCard(){
+  const list=filtered();
+  const n=list.filter(t=>store.learned[t.t]).length;
+  $("#learnedCount").textContent=n;$("#learnedTotal").textContent=list.length;
+  $("#learnBar").style.width=(list.length?n/list.length*100:0)+"%";
+  if(!deck.length)return;
+  const t=deck[idx];
+  $("#flip").classList.remove("flipped");
+  $("#fTag").textContent=$("#bTag").textContent=catName(t.c);
+  $("#fTerm").textContent=$("#bTerm").textContent=t.t;
+  $("#bDef").textContent=t.d;$("#bMnemo").textContent=t.m;
+  $("#fLearned").hidden=!store.learned[t.t];
+  $("#cardPos").textContent="Карточка "+(idx+1)+" из "+deck.length;
+}
+function flip(){$("#flip").classList.toggle("flipped")}
+$("#front").onclick=flip;$("#back").onclick=flip;$("#flipBtn").onclick=flip;
+$("#front").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();flip()}};
+$("#nextCard").onclick=()=>{idx=(idx+1)%deck.length;renderCard()};
+$("#prevCard").onclick=()=>{idx=(idx-1+deck.length)%deck.length;renderCard()};
+$("#shuffleBtn").onclick=()=>buildDeck(true);
+$("#onlyNew").onchange=()=>buildDeck();
+$("#knowBtn").onclick=()=>{store.learned[deck[idx].t]=true;save();idx=(idx+1)%deck.length;renderCard()};
+$("#againBtn").onclick=()=>{delete store.learned[deck[idx].t];save();idx=(idx+1)%deck.length;renderCard()};
+document.addEventListener("keydown",e=>{
+  if(!$("#cards").classList.contains("active")||mode!=="flash")return;
+  if(e.target.tagName==="INPUT")return;
+  if(e.key===" "){e.preventDefault();flip()}
+  else if(e.key==="ArrowRight")$("#nextCard").click();
+  else if(e.key==="ArrowLeft")$("#prevCard").click();
+});
+
+/* ---- Анаграммы ---- */
+let ana=null, anaScore=0, anaStreak=0, anaTimer=null, anaStart=0;
+$("#anaBest").textContent=store.anaBest;
+function setMode(m){
+  mode=m;$("#modeFlash").setAttribute("aria-pressed",m==="flash");$("#modeAna").setAttribute("aria-pressed",m==="ana");
+  $("#flashBox").hidden=m!=="flash";$("#anaBox").hidden=m!=="ana";
+  if(m==="ana"){newAnagram()}else{clearInterval(anaTimer)}
+}
+$("#modeFlash").onclick=()=>setMode("flash");$("#modeAna").onclick=()=>setMode("ana");
+const norm=s=>s.toLowerCase().replace(/ё/g,"е").replace(/[^а-яa-z]/g,"");
+function newAnagram(){
+  const pool=filtered().filter(t=>!ana||t.t!==ana.t.t);
+  const t=pool[Math.floor(Math.random()*pool.length)];
+  const word=t.t.toLowerCase();
+  const letters=word.replace(/\s+/g,"").split("");
+  let mixed;do{mixed=shuffle(letters)}while(mixed.join("")===letters.join("")&&letters.length>2);
+  ana={t,word,hints:0,solved:false};
+  const box=$("#anaLetters");box.innerHTML="";mixed.forEach(ch=>box.appendChild(el("span",{},esc(ch))));
+  const parts=word.split(/\s+/);
+  $("#anaLen").textContent=parts.length>1?"Слов: "+parts.length+" ("+parts.map(p=>p.length).join(" + ")+" букв)":"Букв: "+word.length;
+  $("#anaInput").value="";$("#anaFb").className="feedback";
+  clearInterval(anaTimer);anaStart=Date.now();$("#anaTime").textContent="0";
+  anaTimer=setInterval(()=>{$("#anaTime").textContent=Math.floor((Date.now()-anaStart)/1000)},500);
+  $("#anaInput").focus();
+}
+function anaFeedback(cls,html){const f=$("#anaFb");f.className="feedback show "+cls;f.innerHTML=html;reveal(f)}
+$("#anaForm").onsubmit=e=>{
+  e.preventDefault();if(!ana||ana.solved)return newAnagram();
+  if(norm($("#anaInput").value)===norm(ana.word)){
+    ana.solved=true;clearInterval(anaTimer);
+    const sec=Math.floor((Date.now()-anaStart)/1000);
+    const pts=Math.max(1,10-ana.hints*3-Math.floor(sec/10));
+    anaScore+=pts;anaStreak++;
+    if(anaScore>store.anaBest){store.anaBest=anaScore;save();$("#anaBest").textContent=anaScore}
+    $("#anaScore").textContent=anaScore;$("#anaStreak").textContent=anaStreak;
+    anaFeedback("ok","Верно: <b>"+esc(ana.t.t)+"</b> (+"+pts+"). "+esc(ana.t.d)+"<br><br>Нажми «Проверить» или Enter для следующего слова.");
+  }else{
+    anaStreak=0;$("#anaStreak").textContent=0;
+    anaFeedback("bad","Пока не то. Попробуй ещё или возьми подсказку.");
+  }
+};
+$("#anaHint").onclick=()=>{
+  if(!ana||ana.solved)return;ana.hints++;
+  const w=ana.t.t;
+  if(ana.hints===1)anaFeedback("info","Подсказка: "+esc(ana.t.d.replace(new RegExp(w,"gi"),"…")));
+  else{const k=Math.min(w.length,ana.hints-1);anaFeedback("info","Начинается на: <b>"+esc(w.slice(0,k))+"…</b>")}
+};
+$("#anaSkip").onclick=()=>{if(ana&&!ana.solved){anaStreak=0;$("#anaStreak").textContent=0;anaFeedback("info","Это было: <b>"+esc(ana.t.t)+"</b>");setTimeout(newAnagram,1400)}else newAnagram()};
+
+/* ===================== 2. СРАВНЕНИЯ ===================== */
+let cmpCat="all";
+function renderCmp(){
+  const chips=$("#cmpChips");chips.innerHTML="";
+  const used=CATS.filter(c=>CMP.some(p=>p.cat===c.id));
+  [{id:"all",name:"Все"}].concat(used).forEach(c=>{
+    const b=el("button",{class:"chip","aria-pressed":c.id===cmpCat},esc(c.name));
+    b.onclick=()=>{cmpCat=c.id;renderCmp()};chips.appendChild(b);
+  });
+  const list=$("#cmpList");list.innerHTML="";
+  CMP.filter(p=>cmpCat==="all"||p.cat===cmpCat).forEach(p=>{
+    const c=el("div",{class:"card cmp"});
+    let h='<span class="tag">'+esc(catName(p.cat))+'</span><h3>'+esc(p.title)+'</h3><div class="tbl-wrap"><table><thead><tr><th>Признак</th><th>'+esc(p.a)+'</th><th>'+esc(p.b)+'</th></tr></thead><tbody>';
+    p.rows.forEach(r=>{h+="<tr><td>"+esc(r[0])+"</td><td>"+esc(r[1])+"</td><td>"+esc(r[2])+"</td></tr>"});
+    h+='</tbody></table></div><div class="same"><b>Общее:</b> '+esc(p.same)+"</div>";
+    c.innerHTML=h;list.appendChild(c);
+  });
+}
+
+/* ===================== 3. ЦЕПОЧКИ ===================== */
+let chainIdx=0, pool=[], answer=[];
+function buildChainChips(){
+  const box=$("#chainChips");box.innerHTML="";
+  CHAINS.forEach((c,i)=>{const b=el("button",{class:"chip","aria-pressed":i===chainIdx},esc(c.title.split(":")[0]));b.onclick=()=>{chainIdx=i;buildChainChips();startChain()};box.appendChild(b)});
+}
+function startChain(){
+  const c=CHAINS[chainIdx];$("#chainTitle").textContent=c.title;$("#chainHint").textContent=c.hint;
+  let s;do{s=shuffle(c.items)}while(s.join()===c.items.join());
+  pool=s;answer=[];$("#chainFb").className="feedback";renderChain();
+}
+let dragFrom=null;
+function chainBtn(text,where,i){
+  const b=el("button",{class:"chain-item",draggable:"true"});
+  b.innerHTML=(where==="answer"?'<span class="num">'+(i+1)+"</span>":"")+esc(text);
+  b.onclick=()=>{if(where==="pool"){answer.push(pool.splice(i,1)[0])}else{pool.push(answer.splice(i,1)[0])}$("#chainFb").className="feedback";renderChain()};
+  b.ondragstart=e=>{dragFrom={where,i};b.classList.add("dragging");e.dataTransfer.setData("text/plain","x")};
+  b.ondragend=()=>b.classList.remove("dragging");
+  if(where==="answer"){b.ondragover=e=>e.preventDefault();b.ondrop=e=>{e.preventDefault();e.stopPropagation();moveDrag("answer",i)}}
+  return b;
+}
+function moveDrag(to,pos){
+  if(!dragFrom)return;const src=dragFrom.where==="pool"?pool:answer;const item=src.splice(dragFrom.i,1)[0];
+  const dst=to==="pool"?pool:answer;if(pos===undefined||pos>dst.length)pos=dst.length;dst.splice(pos,0,item);dragFrom=null;$("#chainFb").className="feedback";renderChain();
+}
+["chainAnswer","chainPool"].forEach(id=>{const z=document.getElementById(id);z.ondragover=e=>e.preventDefault();z.ondrop=e=>{e.preventDefault();moveDrag(id==="chainPool"?"pool":"answer")}});
+function renderChain(marks){
+  const a=$("#chainAnswer"),p=$("#chainPool");a.innerHTML="";p.innerHTML="";
+  if(!answer.length)a.appendChild(el("span",{class:"stat"},"Нажимай на элементы ниже по порядку"));
+  answer.forEach((t,i)=>{const b=chainBtn(t,"answer",i);if(marks)b.classList.add(marks[i]?"right":"wrong");a.appendChild(b)});
+  pool.forEach((t,i)=>p.appendChild(chainBtn(t,"pool",i)));
+  if(!pool.length)p.appendChild(el("span",{class:"stat"},"Все элементы расставлены — нажми «Проверить»"));
+}
+function chainFeedback(cls,html){const f=$("#chainFb");f.className="feedback show "+cls;f.innerHTML=html;reveal(f)}
+$("#chainCheck").onclick=()=>{
+  const c=CHAINS[chainIdx];
+  if(pool.length)return chainFeedback("info","Сначала расставь все элементы (осталось: "+pool.length+").");
+  const marks=answer.map((t,i)=>t===c.items[i]);renderChain(marks);
+  const ok=marks.filter(Boolean).length;
+  if(ok===c.items.length)chainFeedback("ok","Всё верно. "+esc(c.note));
+  else chainFeedback("bad","На своём месте: "+ok+" из "+c.items.length+". Красные элементы стоят не там — нажми на них, чтобы вернуть, и попробуй снова.");
+};
+$("#chainReset").onclick=startChain;
+$("#chainShow").onclick=()=>{const c=CHAINS[chainIdx];pool=[];answer=c.items.slice();renderChain(answer.map(()=>true));chainFeedback("info","Правильный порядок показан. "+esc(c.note))};
+
+/* ===================== 4. ПАМЯТКИ ===================== */
+function renderMemo(){
+  const box=$("#memoList");
+  MEMO.forEach((m,i)=>{const d=el("details");if(i===0)d.open=true;d.innerHTML="<summary>"+esc(m.title)+'</summary><div class="body"><ul>'+m.items.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul></div>";box.appendChild(d)});
+}
+
+/* ===================== 5. БЛИЦ-ТЕСТ ===================== */
+const LET=["А","Б","В","Г","Д"];const QN=12,QTIME=600;
+let qs=[],qi=0,picks=[],qTimer=null,qEnd=0,onlyErr=false,lastRes=[];
+$("#quizBest").textContent=store.quizBest===null?"—":store.quizBest+" из 12";
+function startQuiz(){
+  qs=shuffle(QUESTIONS).slice(0,QN).map(q=>{const order=shuffle(q.o.map((_,i)=>i));return{q:q.q,o:order.map(i=>q.o[i]),a:order.map((i,k)=>q.a.includes(i)?k:-1).filter(k=>k>=0),e:q.e}});
+  picks=qs.map(()=>[]);qi=0;
+  $("#quizStart").hidden=true;$("#quizResult").hidden=true;$("#quizRun").hidden=false;
+  qEnd=Date.now()+QTIME*1000;clearInterval(qTimer);tick();qTimer=setInterval(tick,500);
+  renderQ();
+}
+function tick(){
+  const left=Math.max(0,Math.round((qEnd-Date.now())/1000));
+  const t=$("#qTimer");t.textContent=String(Math.floor(left/60)).padStart(2,"0")+":"+String(left%60).padStart(2,"0");
+  t.classList.toggle("low",left<=60);
+  if(left<=0)finishQuiz(true);
+}
+function renderQ(){
+  const q=qs[qi];
+  $("#qPos").textContent="Вопрос "+(qi+1)+" из "+QN;$("#qBar").style.width=(qi/QN*100)+"%";
+  $("#qText").textContent=q.q;
+  const box=$("#qOpts");box.innerHTML="";
+  q.o.forEach((o,i)=>{
+    const b=el("button",{class:"opt","aria-pressed":picks[qi].includes(i)});
+    b.innerHTML='<span class="letter">'+LET[i]+"</span><span>"+esc(o)+"</span>";
+    b.onclick=()=>{const p=picks[qi];const k=p.indexOf(i);if(k>=0)p.splice(k,1);else p.push(i);b.setAttribute("aria-pressed",p.includes(i))};
+    box.appendChild(b);
+  });
+  $("#qPrev").disabled=qi===0;$("#qNext").textContent=qi===QN-1?"Завершить":"Дальше →";
+}
+$("#qPrev").onclick=()=>{if(qi>0){qi--;renderQ()}};
+$("#qNext").onclick=()=>{if(qi<QN-1){qi++;renderQ()}else{
+  const empty=picks.filter(p=>!p.length).length;
+  if(empty&&!confirm("Без ответа вопросов: "+empty+". Завершить тест?"))return;
+  finishQuiz(false)}};
+function finishQuiz(timeout){
+  clearInterval(qTimer);
+  lastRes=qs.map((q,i)=>{const p=picks[i].slice().sort(),a=q.a.slice().sort();return{q,p,ok:p.length===a.length&&p.every((x,k)=>x===a[k])}});
+  const score=lastRes.filter(r=>r.ok).length;
+  if(store.quizBest===null||score>store.quizBest){store.quizBest=score;save()}
+  $("#quizBest").textContent=store.quizBest+" из 12";
+  $("#quizRun").hidden=true;$("#quizResult").hidden=false;
+  $("#rScore").textContent=score+" из "+QN;
+  const used=Math.min(QTIME,Math.round((Date.now()-(qEnd-QTIME*1000))/1000));
+  $("#rText").textContent=(timeout?"Время вышло. ":"Время: "+Math.floor(used/60)+" мин "+used%60+" с. ")+(score>=11?"Отлично — ты готова!":score>=8?"Хорошо! Разбери ошибки и пройди ещё раз.":"Посмотри разбор ниже и повтори карточки и сравнения.")+" Лучший результат: "+store.quizBest+".";
+  onlyErr=false;$("#quizOnlyErr").textContent="Показать только ошибки";renderReview();
+  reveal($("#quizResult"));
+}
+function renderReview(){
+  const box=$("#rList");box.innerHTML="";
+  lastRes.forEach((r,i)=>{
+    if(onlyErr&&r.ok)return;
+    const L=a=>a.length?a.map(k=>LET[k]).join(", "):"нет ответа";
+    const d=el("div",{class:"review-item"+(r.ok?" good":"")});
+    d.innerHTML="<b>"+(i+1)+". "+esc(r.q.q)+"</b><br>"+r.q.o.map((o,k)=>LET[k]+") "+esc(o)).join("<br>")+
+      '<p style="margin:8px 0 4px">Твой ответ: <b>'+L(r.p)+"</b> · Правильно: <b>"+L(r.q.a)+"</b> · "+(r.ok?'<span style="color:var(--ok)">засчитано</span>':'<span style="color:var(--bad)">0 баллов</span>')+'</p><div class="stat" style="color:var(--text)">'+esc(r.q.e)+"</div>";
+    box.appendChild(d);
+  });
+  if(!box.children.length)box.appendChild(el("div",{class:"card"},"Ошибок нет — всё правильно."));
+}
+$("#quizGo").onclick=startQuiz;$("#quizAgain").onclick=startQuiz;
+$("#quizOnlyErr").onclick=()=>{onlyErr=!onlyErr;$("#quizOnlyErr").textContent=onlyErr?"Показать все вопросы":"Показать только ошибки";renderReview()};
+
+/* ===================== СТАРТ ===================== */
+buildCatChips();buildDeck();renderCmp();buildChainChips();startChain();renderMemo();updateHome();
+</script>
+
+<!-- ПАНЕЛЬ АВТОРА -->
+<style>
+.author-bar{position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;justify-content:center;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.5rem 1rem;background:#0f2d22;color:#fff;font:600 14px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;box-shadow:0 -2px 10px rgba(0,0,0,.15)}
+.author-bar a{color:#9ff0d2;text-decoration:none}
+.author-bar a:hover,.author-bar a:focus{text-decoration:underline}
+body{padding-bottom:3.25rem}
+</style>
+<div class="author-bar" role="contentinfo"><span>Ксения Каширина,</span> <a href="mailto:kashka2807@mail.ru">kashka2807@mail.ru</a></div>
+</body>
+</html>
